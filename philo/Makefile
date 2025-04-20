@@ -13,7 +13,7 @@
 NAME = philo
 FLAG = -Wall -Wextra -Werror -pthread
 HEADER= philo.h
-SRC = philo.c utils.c
+SRC = philo.c utils.c life.c
 
 all: $(NAME)
 $(NAME): $(SRC)
