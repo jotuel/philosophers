@@ -20,12 +20,12 @@
 
 enum e_philo_state
 {
-    PHILO_EAT,
-    PHILO_SLEEP,
-    PHILO_THINK,
-    PHILO_DIE,
-    PHILO_FORK,
-    PHILO_DONE
+    EATING,
+    SLEEPING,
+    THINKING,
+    DEAD,
+    FORK,
+    DONE
 };
 
 typedef struct s_philo
@@ -33,10 +33,13 @@ typedef struct s_philo
     int id;
     int left_fork;
     int right_fork;
-    int state;
+    enum e_philo_state state;
     int eat_count;
     int last_eat_time;
     pthread_t thread;
 } t_philo;
+
+t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meals);
+t_philo *sanitize_input(int argc, char **argv);
 
 #endif
