@@ -25,6 +25,18 @@ static int ft_atoi(char *s)
     return (result);
 }
 
+void free_philos(t_philo *philos)
+{
+    int i = 0;
+
+    while (philos[i].id)
+    {
+        pthread_exit(&philos[i].thread);
+        i++;
+    }
+    free(philos);
+}
+
 t_philo *sanitize_input(int argc, char **argv)
 {
     t_philo *sophers;
@@ -44,9 +56,6 @@ t_philo *sanitize_input(int argc, char **argv)
     if (philos && eat_time && sleep_time && nbr_meals)
         sophers = init_philos(philos, eat_time, sleep_time, nbr_meals);
     if (!sophers)
-    {
         printf("Error: Failed to initialize philosophers.\n");
-        exit(EXIT_FAILURE);
-    }
     return (sophers);
 }

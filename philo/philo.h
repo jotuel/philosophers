@@ -12,11 +12,14 @@
 
 #ifndef PHILO_H
 # define PHILO_H
+#include <inttypes.h>
 # include <pthread.h>
 # include <stdlib.h>
 # include <stdio.h>
-# include <time.h>
+# include <sys/time.h>
 # include <unistd.h>
+# include <stdbool.h>
+# include <string.h>
 
 enum e_philo_state
 {
@@ -31,8 +34,11 @@ enum e_philo_state
 typedef struct s_philo
 {
     int id;
-    int left_fork;
-    int right_fork;
+    suseconds_t start_time;
+    int sleep_time;
+    int eat_time;
+    pthread_mutex_t *left_fork;
+    pthread_mutex_t *right_fork;
     enum e_philo_state state;
     int eat_count;
     int last_eat_time;
@@ -41,5 +47,12 @@ typedef struct s_philo
 
 t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meals);
 t_philo *sanitize_input(int argc, char **argv);
+pthread_mutex_t *init_mutexes(int num_philos);
+void create_threads(t_philo *philos);
+void join_threads(t_philo *philos);
+void free_philos(t_philo *philos);
+void eating(t_philo *philo);
+void sleeping(t_philo *philo);
+void thinking(t_philo *philo);
 
 #endif
