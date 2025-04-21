@@ -51,6 +51,7 @@ t_philo *init_philos(int arguments[5], t_philo *philos, int i);
 t_philo *sanitize_input(int argc, char **argv, t_philo *philos);
 pthread_mutex_t *init_mutexes(int num_philos);
 size_t	get_current_time(void);
+void print_status(t_philo *philo, char *status, bool destroy);
 void create_threads(t_philo *philos);
 void join_threads(t_philo *philos);
 void free_philos(t_philo *philos);

@@ -19,10 +19,15 @@ static void check_pulse(enum e_philo_state *state, unsigned long last_meal,
         *state = DEAD;
 }
 
-void print_status(t_philo *philo, char *status)
+void print_status(t_philo *philo, char *status, bool destroy)
 {
     static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 
+    if (destroy)
+    {
+        pthread_mutex_destroy(&mtx);
+        return ;
+    }
     pthread_mutex_lock(&mtx);
     printf("%ld %d %s\n", get_current_time() - philo->start, philo->id, status);
     pthread_mutex_unlock(&mtx);
@@ -32,7 +37,7 @@ void sleeping(t_philo *philo)
 {
     check_pulse(&philo->state, philo->last_eat_time, philo->lifetime);
     if (philo->state != DEAD)
-        print_status(philo, "is sleeping");
+        print_status(philo, "is sleeping", false);
     usleep(philo->sleep_time * 1000);
     philo->state = THINKING;
 }
@@ -41,7 +46,7 @@ void thinking(t_philo *philo)
 {
     check_pulse(&philo->state, philo->last_eat_time, philo->lifetime);
     if (philo->state != DEAD)
-        print_status(philo, "is thinking");
+        print_status(philo, "is thinking", false);
     usleep(20);
     philo->state = EATING;
 }
@@ -49,12 +54,16 @@ void thinking(t_philo *philo)
 void eating(t_philo *philo)
 {
     pthread_mutex_lock(philo->left_fork);
-    print_status(philo, "has taken a fork");
-    pthread_mutex_lock(philo->right_fork);
-    print_status(philo, "has taken a fork");
     check_pulse(&philo->state, philo->last_eat_time, philo->lifetime);
     if (philo->state != DEAD)
-        print_status(philo, "is eating");
+        print_status(philo, "has taken a fork", false);
+    pthread_mutex_lock(philo->right_fork);
+    check_pulse(&philo->state, philo->last_eat_time, philo->lifetime);
+    if (philo->state != DEAD)
+        print_status(philo, "has taken a fork", false);
+    check_pulse(&philo->state, philo->last_eat_time, philo->lifetime);
+    if (philo->state != DEAD)
+        print_status(philo, "is eating", false);
     usleep(philo->eat_time * 1000);
     pthread_mutex_unlock(philo->left_fork);
     pthread_mutex_unlock(philo->right_fork);

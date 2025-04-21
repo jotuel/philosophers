@@ -45,9 +45,9 @@ t_philo *init_philos(int arguments[5], t_philo *philos, int i)
         philos[i].last_eat_time = philos[i].start;
         philos[i].left_fork = malloc(sizeof(pthread_mutex_t));
         if (!philos[i].left_fork)
-            return (NULL);
+            return (free_philos(philos), NULL);
         if (pthread_mutex_init(philos[i].left_fork, NULL))
-            return (NULL);
+            return (free_philos(philos), NULL);
         i++;
         philos[i].right_fork = philos[i - 1].left_fork;
     }

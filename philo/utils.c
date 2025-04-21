@@ -49,6 +49,7 @@ void free_philos(t_philo *philos)
         i++;
     }
     free(philos);
+    print_status(NULL, NULL, true);
 }
 
 t_philo *sanitize_input(int argc, char **argv, t_philo *philos)
