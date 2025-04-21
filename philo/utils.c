@@ -64,9 +64,10 @@ t_philo *sanitize_input(int argc, char **argv, t_philo *philos)
         arguments[4] = ft_atoi(argv[5]);
     else
         arguments[4] = -1;
-    if (arguments[0] && arguments[1] && arguments[2] && arguments[3] && arguments[4])
+    if (arguments[0] && arguments[1] && arguments[2] &&
+        arguments[3] && arguments[4])
         philos = init_philos(arguments, philos, 0);
     if (!philos)
-        printf("Error: Failed to initialize philosophers.\n");
+        write(2, "Error: Failed to initialize philosophers.\n", 43);
     return (philos);
 }
