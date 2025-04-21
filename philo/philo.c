@@ -17,7 +17,12 @@ int main(int argc, char **argv)
     t_philo *philos;
 
     if (argc != 5 && argc != 6)
+    {
+        write(2, "Usage: ./philo <number_of_philosophers> <time_to_die " \
+            "<time_to_eat> <time_to_sleep> "\
+            "[<number_of_times_each_philosopher_must_eat>]\n", 129);
         return (EXIT_FAILURE);
+    }
     philos = NULL;
     philos = sanitize_input(argc, argv, philos);
     if (!philos)
