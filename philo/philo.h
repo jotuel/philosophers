@@ -34,20 +34,22 @@ enum e_philo_state
 typedef struct s_philo
 {
     int id;
-    suseconds_t start_time;
-    int sleep_time;
-    int eat_time;
-    pthread_mutex_t left_fork;
-    pthread_mutex_t right_fork;
+    unsigned long start;
+    unsigned long sleep_time;
+    unsigned long eat_time;
+    unsigned long last_eat_time;
+    pthread_mutex_t *left_fork;
+    pthread_mutex_t *right_fork;
     enum e_philo_state state;
     int eat_count;
-    int last_eat_time;
+    struct timeval last_meal;
     pthread_t thread;
 } t_philo;
 
 t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meals);
 t_philo *sanitize_input(int argc, char **argv);
 pthread_mutex_t *init_mutexes(int num_philos);
+size_t	get_current_time(void);
 void create_threads(t_philo *philos);
 void join_threads(t_philo *philos);
 void free_philos(t_philo *philos);

@@ -22,8 +22,6 @@ int main(int argc, char **argv)
     if (!philos)
         return (EXIT_FAILURE);
     create_threads(philos);
-    while(true)
-        printf("\n");
     join_threads(philos);
     free(philos);
 }
@@ -33,10 +31,10 @@ t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meal
     t_philo *philos;
     int i;
 
-    philos = malloc(sizeof(t_philo) * num_philos + 1);
-    memset(philos, 0, sizeof(t_philo) * num_philos + 1);
+    philos = malloc(sizeof(t_philo) * (num_philos + 1));
     if (!philos)
         return (philos);
+    memset(philos, 0, sizeof(t_philo) * (num_philos + 1));
     i = 0;
     while (i < num_philos)
     {
@@ -44,11 +42,16 @@ t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meal
         philos[i].sleep_time = sleep_time;
         philos[i].eat_time = meal_time;
         philos[i].state = THINKING;
+        philos[i].start = get_current_time();
+        philos[i].last_eat_time = philos[i].start;
         philos[i].eat_count = nbr_meals;
-        if (!pthread_mutex_init(&philos[i].left_fork, NULL))
+        philos[i].left_fork = malloc(sizeof(pthread_mutex_t));
+        if (!philos[i].left_fork)
             return (NULL);
-        if (i++ > 0)
-            philos[i].right_fork = philos[i - 1].left_fork;
+        if (pthread_mutex_init(philos[i].left_fork, NULL))
+            return (NULL);
+        i++;
+        philos[i].right_fork = philos[i - 1].left_fork;
     }
     philos[0].right_fork = philos[num_philos - 1].left_fork;
     return (philos);
@@ -62,7 +65,7 @@ static void *philosopher(void *state)
     while(true)
     {
         if (philo->state == DONE || philo->state == DEAD)
-            return (NULL);
+            pthread_exit(NULL);
         else if (philo->state == EATING)
             eating(philo);
         else if (philo->state == SLEEPING)
@@ -79,8 +82,10 @@ void create_threads(t_philo *philos)
     i = 0;
     while (philos[i].id)
     {
-        philos[i].thread = pthread_create(&philos[i].thread, NULL, &philosopher, &philos[i]);
-        i++;
+        if(pthread_create(&philos[i].thread, NULL, &philosopher, &philos[i]))
+            return ;
+        else
+            i++;
     }
 }
 

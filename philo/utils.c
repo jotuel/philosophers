@@ -25,13 +25,24 @@ static int ft_atoi(char *s)
     return (result);
 }
 
+size_t	get_current_time(void)
+{
+	struct timeval	time;
+
+	if (gettimeofday(&time, NULL) == -1)
+		write(2, "gettimeofday() error\n", 22);
+	return (time.tv_sec * 1000 + time.tv_usec / 1000);
+}
+
 void free_philos(t_philo *philos)
 {
-    int i = 0;
+    int i;
 
+    i = 0;
     while (philos[i].id)
     {
         pthread_exit(&philos[i].thread);
+        free(philos[i].left_fork);
         i++;
     }
     free(philos);
