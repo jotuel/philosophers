@@ -37,8 +37,8 @@ typedef struct s_philo
     suseconds_t start_time;
     int sleep_time;
     int eat_time;
-    pthread_mutex_t *left_fork;
-    pthread_mutex_t *right_fork;
+    pthread_mutex_t left_fork;
+    pthread_mutex_t right_fork;
     enum e_philo_state state;
     int eat_count;
     int last_eat_time;

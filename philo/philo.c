@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "philo.h"
-#include <pthread.h>
 
 int main(int argc, char **argv)
 {
@@ -23,6 +22,8 @@ int main(int argc, char **argv)
     if (!philos)
         return (EXIT_FAILURE);
     create_threads(philos);
+    while(true)
+        printf("\n");
     join_threads(philos);
     free(philos);
 }
@@ -44,35 +45,29 @@ t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meal
         philos[i].eat_time = meal_time;
         philos[i].state = THINKING;
         philos[i].eat_count = nbr_meals;
-        if (!pthread_mutex_init(philos[i].left_fork, NULL))
-        {
-            free_philos(philos);
-            break ;
-        }
+        if (!pthread_mutex_init(&philos[i].left_fork, NULL))
+            return (NULL);
         if (i++ > 0)
             philos[i].right_fork = philos[i - 1].left_fork;
     }
+    philos[0].right_fork = philos[num_philos - 1].left_fork;
     return (philos);
 }
 
 static void *philosopher(void *state)
 {
     t_philo *philo;
-    enum e_philo_state status;
 
     philo = state;
-    status = philo->state;
     while(true)
     {
-        if (status == DONE)
-            pthread_detach(philo->thread);
-        if (status == DEAD)
+        if (philo->state == DONE || philo->state == DEAD)
             return (NULL);
-        if (status == EATING)
+        else if (philo->state == EATING)
             eating(philo);
-        if (status == SLEEPING)
+        else if (philo->state == SLEEPING)
             sleeping(philo);
-        if (status == THINKING)
+        else if (philo->state == THINKING)
             thinking(philo);
     }
 }
