@@ -38,6 +38,7 @@ typedef struct s_philo
     unsigned long sleep_time;
     unsigned long eat_time;
     unsigned long last_eat_time;
+    unsigned long lifetime;
     pthread_mutex_t *left_fork;
     pthread_mutex_t *right_fork;
     enum e_philo_state state;
@@ -46,8 +47,8 @@ typedef struct s_philo
     pthread_t thread;
 } t_philo;
 
-t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meals);
-t_philo *sanitize_input(int argc, char **argv);
+t_philo *init_philos(int arguments[5], t_philo *philos, int i);
+t_philo *sanitize_input(int argc, char **argv, t_philo *philos);
 pthread_mutex_t *init_mutexes(int num_philos);
 size_t	get_current_time(void);
 void create_threads(t_philo *philos);

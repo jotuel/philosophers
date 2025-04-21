@@ -22,6 +22,8 @@ static int ft_atoi(char *s)
         result = result * 10 + (s[i] - '0');
         i++;
     }
+    if (s[i])
+        result = 0;
     return (result);
 }
 
@@ -42,31 +44,28 @@ void free_philos(t_philo *philos)
     while (philos[i].id)
     {
         pthread_exit(&philos[i].thread);
+        pthread_mutex_destroy(philos[i].left_fork);
         free(philos[i].left_fork);
         i++;
     }
     free(philos);
 }
 
-t_philo *sanitize_input(int argc, char **argv)
+t_philo *sanitize_input(int argc, char **argv, t_philo *philos)
 {
-    t_philo *sophers;
-    int philos;
-    int eat_time;
-    int sleep_time;
-    int nbr_meals;
+    int arguments[5];
 
-    sophers = NULL;
-    philos = ft_atoi(argv[1]);
-    eat_time = ft_atoi(argv[2]);
-    sleep_time = ft_atoi(argv[3]);
-    if (argc == 5)
-        nbr_meals = ft_atoi(argv[4]);
+    arguments[0] = ft_atoi(argv[1]);
+    arguments[1] = ft_atoi(argv[2]);
+    arguments[2] = ft_atoi(argv[3]);
+    arguments[3] = ft_atoi(argv[4]);
+    if (argc == 6)
+        arguments[4] = ft_atoi(argv[5]);
     else
-        nbr_meals = -1;
-    if (philos && eat_time && sleep_time && nbr_meals)
-        sophers = init_philos(philos, eat_time, sleep_time, nbr_meals);
-    if (!sophers)
+        arguments[4] = -1;
+    if (arguments[0] && arguments[1] && arguments[2] && arguments[3] && arguments[4])
+        philos = init_philos(arguments, philos, 0);
+    if (!philos)
         printf("Error: Failed to initialize philosophers.\n");
-    return (sophers);
+    return (philos);
 }

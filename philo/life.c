@@ -30,16 +30,16 @@ void print_status(t_philo *philo, char *status)
 
 void sleeping(t_philo *philo)
 {
-    check_pulse(&philo->state, philo->last_eat_time, philo->eat_time);
+    check_pulse(&philo->state, philo->last_eat_time, philo->lifetime);
     if (philo->state != DEAD)
         print_status(philo, "is sleeping");
-    usleep(philo->sleep_time);
+    usleep(philo->sleep_time * 1000);
     philo->state = THINKING;
 }
 
 void thinking(t_philo *philo)
 {
-    check_pulse(&philo->state, philo->last_eat_time, philo->eat_time);
+    check_pulse(&philo->state, philo->last_eat_time, philo->lifetime);
     if (philo->state != DEAD)
         print_status(philo, "is thinking");
     usleep(20);
@@ -49,8 +49,10 @@ void thinking(t_philo *philo)
 void eating(t_philo *philo)
 {
     pthread_mutex_lock(philo->left_fork);
+    print_status(philo, "has taken a fork");
     pthread_mutex_lock(philo->right_fork);
-    check_pulse(&philo->state, philo->last_eat_time, philo->eat_time);
+    print_status(philo, "has taken a fork");
+    check_pulse(&philo->state, philo->last_eat_time, philo->lifetime);
     if (philo->state != DEAD)
         print_status(philo, "is eating");
     usleep(philo->eat_time * 1000);

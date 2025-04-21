@@ -18,7 +18,8 @@ int main(int argc, char **argv)
 
     if (argc != 5 && argc != 6)
         return (EXIT_FAILURE);
-    philos = sanitize_input(argc, argv);
+    philos = NULL;
+    philos = sanitize_input(argc, argv, philos);
     if (!philos)
         return (EXIT_FAILURE);
     create_threads(philos);
@@ -26,25 +27,22 @@ int main(int argc, char **argv)
     free(philos);
 }
 
-t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meals)
+t_philo *init_philos(int arguments[5], t_philo *philos, int i)
 {
-    t_philo *philos;
-    int i;
-
-    philos = malloc(sizeof(t_philo) * (num_philos + 1));
+    philos = malloc(sizeof(t_philo) * (arguments[0] + 1));
     if (!philos)
         return (philos);
-    memset(philos, 0, sizeof(t_philo) * (num_philos + 1));
-    i = 0;
-    while (i < num_philos)
+    memset(philos, 0, sizeof(t_philo) * (arguments[0] + 1));
+    while (i < arguments[0])
     {
         philos[i].id = i + 1;
-        philos[i].sleep_time = sleep_time;
-        philos[i].eat_time = meal_time;
+        philos[i].sleep_time = arguments[3];
+        philos[i].lifetime = arguments[1];
+        philos[i].eat_time = arguments[2];
+        philos[i].eat_count = arguments[4];
         philos[i].state = THINKING;
         philos[i].start = get_current_time();
         philos[i].last_eat_time = philos[i].start;
-        philos[i].eat_count = nbr_meals;
         philos[i].left_fork = malloc(sizeof(pthread_mutex_t));
         if (!philos[i].left_fork)
             return (NULL);
@@ -53,7 +51,7 @@ t_philo *init_philos(int num_philos, int meal_time, int sleep_time, int nbr_meal
         i++;
         philos[i].right_fork = philos[i - 1].left_fork;
     }
-    philos[0].right_fork = philos[num_philos - 1].left_fork;
+    philos[0].right_fork = philos[arguments[0] - 1].left_fork;
     return (philos);
 }
 
