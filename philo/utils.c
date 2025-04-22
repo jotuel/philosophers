@@ -11,20 +11,23 @@
 /* ************************************************************************** */
 
 #include "philo.h"
+#include <bits/pthreadtypes.h>
 
-static int ft_atoi(char *s)
+static int	ft_atoi(char *s)
 {
-    int result = 0;
-    int i = 0;
+	int	result;
+	int	i;
 
-    while (s[i] >= '0' && s[i] <= '9')
-    {
-        result = result * 10 + (s[i] - '0');
-        i++;
-    }
-    if (s[i])
-        result = 0;
-    return (result);
+	result = 0;
+	i = 0;
+	while (s[i] >= '0' && s[i] <= '9')
+	{
+		result = result * 10 + (s[i] - '0');
+		i++;
+	}
+	if (s[i])
+		result = 0;
+	return (result);
 }
 
 size_t	get_current_time(void)
@@ -36,38 +39,61 @@ size_t	get_current_time(void)
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
-void free_philos(t_philo *philos)
+void	free_philos(t_philo *philos)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    while (philos[i].id)
-    {
-        pthread_exit(&philos[i].thread);
-        pthread_mutex_destroy(philos[i].left_fork);
-        free(philos[i].left_fork);
-        i++;
-    }
-    free(philos);
-    print_status(NULL, NULL, true);
+	i = 0;
+	while (philos[i].id)
+	{
+		pthread_exit(&philos[i].thread);
+		pthread_mutex_destroy(philos[i].left_fork);
+		free(philos[i].left_fork);
+		i++;
+	}
+	free(philos);
+	print_status(NULL, NULL, true);
 }
 
-t_philo *sanitize_input(int argc, char **argv, t_philo *philos)
+t_philo	*sanitize_input(int argc, char **argv, t_philo *philos)
 {
-    int arguments[5];
+	int	arguments[5];
 
-    arguments[0] = ft_atoi(argv[1]);
-    arguments[1] = ft_atoi(argv[2]);
-    arguments[2] = ft_atoi(argv[3]);
-    arguments[3] = ft_atoi(argv[4]);
-    if (argc == 6)
-        arguments[4] = ft_atoi(argv[5]);
-    else
-        arguments[4] = -1;
-    if (arguments[0] && arguments[1] && arguments[2] &&
-        arguments[3] && arguments[4])
-        philos = init_philos(arguments, philos, 0);
-    if (!philos)
-        write(2, "Error: Failed to initialize philosophers.\n", 43);
-    return (philos);
+	arguments[0] = ft_atoi(argv[1]);
+	arguments[1] = ft_atoi(argv[2]);
+	arguments[2] = ft_atoi(argv[3]);
+	arguments[3] = ft_atoi(argv[4]);
+	if (argc == 6)
+		arguments[4] = ft_atoi(argv[5]);
+	else
+		arguments[4] = -1;
+	if (arguments[0] && arguments[1] && arguments[2] && arguments[3]
+		&& arguments[4])
+		philos = init_philos(arguments, philos, 0);
+	if (!philos)
+		write(2, "Error: Failed to initialize philosophers.\n", 43);
+	return (philos);
+}
+
+void	fork_lock(t_philo *philo)
+{
+	if (philo->id % 2)
+	{
+		pthread_mutex_lock(philo->left_fork);
+		check_pulse(philo->last_eat_time, philo->lifetime, philo);
+		if (philo->state != DEAD && philo->state != DONE)
+			print_status(philo, "has taken a fork", false);
+		pthread_mutex_lock(philo->right_fork);
+	}
+	else
+	{
+		pthread_mutex_lock(philo->right_fork);
+		check_pulse(philo->last_eat_time, philo->lifetime, philo);
+		if (philo->state != DEAD && philo->state != DONE)
+			print_status(philo, "has taken a fork", false);
+		pthread_mutex_lock(philo->left_fork);
+	}
+	check_pulse(philo->last_eat_time, philo->lifetime, philo);
+	if (philo->state != DEAD && philo->state != DONE)
+		print_status(philo, "is eating", false);
 }
