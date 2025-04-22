@@ -13,8 +13,8 @@
 #include "philo.h"
 #include <stdatomic.h>
 
-void	check_pulse(unsigned long last_meal,
-		unsigned long time_btw_meals, t_philo *philo)
+void	check_pulse(unsigned long last_meal, unsigned long time_btw_meals,
+		t_philo *philo)
 {
 	if (*(philo->death))
 		philo->state = DONE;
@@ -24,7 +24,7 @@ void	check_pulse(unsigned long last_meal,
 		philo->state = DEAD;
 		*philo->death = true;
 	}
-	else if(*(philo->death))
+	else if (*(philo->death))
 		philo->state = DONE;
 }
 

@@ -52,7 +52,8 @@ typedef struct s_philo
 t_philo					*init_philos(int arguments[5], t_philo *philos, int i);
 t_philo					*sanitize_input(int argc, char **argv, t_philo *philos);
 void					fork_lock(t_philo *philo);
-void					check_pulse(unsigned long last_meal, unsigned long time_btw_meals, t_philo *philo);
+void					check_pulse(unsigned long last_meal,
+							unsigned long time_btw_meals, t_philo *philo);
 pthread_mutex_t			*init_mutexes(int num_philos);
 size_t					get_current_time(void);
 void					print_status(t_philo *philo, char *status,
