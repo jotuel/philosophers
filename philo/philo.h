@@ -40,6 +40,7 @@ typedef struct s_philo
 	unsigned long		eat_time;
 	unsigned long		last_eat_time;
 	unsigned long		lifetime;
+	pthread_mutex_t		fork;
 	pthread_mutex_t		*left_fork;
 	pthread_mutex_t		*right_fork;
 	enum e_philo_state	state;
@@ -47,6 +48,7 @@ typedef struct s_philo
 	struct timeval		last_meal;
 	pthread_t			thread;
 	atomic_bool			*death;
+	atomic_bool			*begin;
 }						t_philo;
 
 t_philo					*init_philos(int arguments[5], t_philo *philos, int i);

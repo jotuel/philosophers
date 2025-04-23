@@ -20,9 +20,9 @@ void	check_pulse(unsigned long last_meal, unsigned long time_btw_meals,
 		philo->state = DONE;
 	else if (get_current_time() - last_meal > time_btw_meals)
 	{
-		print_status(philo, "has died", false);
 		philo->state = DEAD;
 		*philo->death = true;
+		print_status(philo, "has died", false);
 	}
 	else if (*(philo->death))
 		philo->state = DONE;
@@ -39,7 +39,8 @@ void	print_status(t_philo *philo, char *status, bool destroy)
 		return ;
 	}
 	pthread_mutex_lock(&mtx);
-	printf(fmt, get_current_time() - philo->start, philo->id, status);
+	if (!*(philo->death) || philo->state == DEAD)
+		printf(fmt, get_current_time() - philo->start, philo->id, status);
 	pthread_mutex_unlock(&mtx);
 }
 

@@ -11,7 +11,7 @@
 # *************************************************************************** #
 
 NAME = philo
-FLAG = -Wall -Wextra -Werror -pthread -g2 -ggdb -gdwarf
+FLAG = -Wall -Wextra -Werror -pthread
 HEADER= philo.h
 SRC = philo.c utils.c life.c
 

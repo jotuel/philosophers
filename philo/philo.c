@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "philo.h"
+#include <stdatomic.h>
 
 int	main(int argc, char **argv)
 {
@@ -18,17 +19,20 @@ int	main(int argc, char **argv)
 
 	if (argc != 5 && argc != 6)
 	{
-		write(2, \
-		"Usage: ./philo <number_of_philosophers> <time_to_die " \
-		"<time_to_eat> <time_to_sleep> " \
-		"[<number_of_times_each_philosopher_must_eat>]\n", \
-		129);
+		write(2,
+			"Usage: ./philo <number_of_philosophers> <time_to_die "
+			"<time_to_eat> <time_to_sleep> "
+			"[<number_of_times_each_philosopher_must_eat>]\n",
+			129);
 		return (EXIT_FAILURE);
 	}
 	philos = NULL;
 	philos = sanitize_input(argc, argv, philos);
 	if (!philos)
+	{
+		write(2, "Error: Failed to allocate memory for philosophers\n", 51);
 		return (EXIT_FAILURE);
+	}
 	create_threads(philos);
 	join_threads(philos);
 	free(philos);
@@ -50,9 +54,7 @@ t_philo	*init_philos(int arguments[5], t_philo *philos, int i)
 		philos[i].state = THINKING;
 		philos[i].start = get_current_time();
 		philos[i].last_eat_time = philos[i].start;
-		philos[i].left_fork = malloc(sizeof(pthread_mutex_t));
-		if (!philos[i].left_fork)
-			return (free_philos(philos), NULL);
+		philos[i].left_fork = &philos[i].fork;
 		if (pthread_mutex_init(philos[i].left_fork, NULL))
 			return (free_philos(philos), NULL);
 		i++;
@@ -67,6 +69,8 @@ static void	*philosopher(void *state)
 	t_philo	*philo;
 
 	philo = state;
+	while (!*philo->begin)
+		;
 	while (true)
 	{
 		if (philo->state == DONE || philo->state == DEAD)
@@ -83,17 +87,25 @@ static void	*philosopher(void *state)
 void	create_threads(t_philo *philos)
 {
 	static atomic_bool	death = false;
+	static atomic_bool	begin = false;
 	int					i;
 
 	i = 0;
 	while (philos[i].id)
 	{
 		philos[i].death = &death;
+		philos[i].begin = &begin;
 		if (pthread_create(&philos[i].thread, NULL, &philosopher, &philos[i]))
+		{
+			write(2, "Error: pthread_create failed\n", 30);
+			death = true;
+			begin = true;
 			return ;
+		}
 		else
 			i++;
 	}
+	begin = true;
 }
 
 void	join_threads(t_philo *philos)
