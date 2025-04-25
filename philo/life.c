@@ -11,66 +11,76 @@
 /* ************************************************************************** */
 
 #include "philo.h"
-#include <stdatomic.h>
 
-void	check_pulse(unsigned long last_meal, unsigned long time_btw_meals,
-		t_philo *philo)
+void	*observer(void *arg)
 {
-	if (*(philo->death))
-		philo->state = DONE;
-	else if (get_current_time() - last_meal > time_btw_meals)
+	int		i;
+	t_philo	*philo;
+
+	philo = (t_philo *)arg;
+	i = 0;
+	while (philo[0].state != DONE)
 	{
-		philo->state = DEAD;
-		*philo->death = true;
-		print_status(philo, "has died", false);
+		while (philo[i].id)
+		{
+			if (get_time() - philo[i].last_eat_time > philo[i].lifetime
+				&& philo[i].state)
+			{
+				philo[i].state = DEAD;
+				*philo[i].death = true;
+				print_status(&philo[i], "died", false);
+				philo[i].state = DONE;
+				return (NULL);
+			}
+			i++;
+		}
+		i = 0;
+		usleep(1000);
 	}
-	else if (*(philo->death))
-		philo->state = DONE;
+	return (NULL);
 }
 
-void	print_status(t_philo *philo, char *status, bool destroy)
+void	*philosopher(void *state)
 {
-	static pthread_mutex_t	mtx = PTHREAD_MUTEX_INITIALIZER;
-	static char				*fmt = "%ld %d %s\n";
+	t_philo	*philo;
 
-	if (destroy)
+	philo = state;
+	while (!*philo->begin)
+		usleep(1000);
+	philo->start = get_time();
+	philo->last_eat_time = philo->start;
+	while (!*philo->death)
 	{
-		pthread_mutex_destroy(&mtx);
-		return ;
+		if (philo->state == FORK)
+			eating(philo);
+		else if (philo->state == SLEEPING)
+			sleeping(philo);
+		else if (philo->state == THINKING)
+			thinking(philo);
 	}
-	pthread_mutex_lock(&mtx);
-	if (!*(philo->death) || philo->state == DEAD)
-		printf(fmt, get_current_time() - philo->start, philo->id, status);
-	pthread_mutex_unlock(&mtx);
+	return (NULL);
 }
 
 void	sleeping(t_philo *philo)
 {
-	check_pulse(philo->last_eat_time, philo->lifetime, philo);
-	if (philo->state == DEAD || philo->state == DONE)
-		return ;
 	print_status(philo, "is sleeping", false);
 	usleep(philo->sleep_time * 1000);
+	if (philo->state == DEAD || philo->state == DONE)
+		return ;
 	philo->state = THINKING;
 }
 
 void	thinking(t_philo *philo)
 {
-	check_pulse(philo->last_eat_time, philo->lifetime, philo);
-	if (philo->state == DEAD || philo->state == DONE)
-		return ;
 	print_status(philo, "is thinking", false);
-	usleep(20);
-	philo->state = EATING;
+	philo->state = FORK;
 }
 
 void	eating(t_philo *philo)
 {
-	check_pulse(philo->last_eat_time, philo->lifetime, philo);
-	if (philo->left_fork == philo->right_fork)
-		return ;
 	fork_lock(philo);
 	usleep(philo->eat_time * 1000);
+	philo->last_eat_time = get_time();
 	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_unlock(philo->right_fork);
 	philo->eat_count--;
@@ -79,8 +89,5 @@ void	eating(t_philo *philo)
 		philo->state = DONE;
 		return ;
 	}
-	philo->last_eat_time = get_current_time();
-	if (philo->state == DEAD || philo->state == DONE)
-		return ;
 	philo->state = SLEEPING;
 }

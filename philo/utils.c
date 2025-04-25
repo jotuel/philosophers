@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "philo.h"
-#include <bits/pthreadtypes.h>
 
 static int	ft_atoi(char *s)
 {
@@ -25,12 +24,12 @@ static int	ft_atoi(char *s)
 		result = result * 10 + (s[i] - '0');
 		i++;
 	}
-	if (s[i])
+	if (s[i] || result < 0)
 		result = 0;
 	return (result);
 }
 
-size_t	get_current_time(void)
+size_t	get_time(void)
 {
 	struct timeval	time;
 
@@ -48,7 +47,6 @@ void	free_philos(t_philo *philos)
 	{
 		pthread_exit(&philos[i].thread);
 		pthread_mutex_destroy(philos[i].left_fork);
-		free(philos[i].left_fork);
 		i++;
 	}
 	free(philos);
@@ -77,23 +75,21 @@ t_philo	*sanitize_input(int argc, char **argv, t_philo *philos)
 
 void	fork_lock(t_philo *philo)
 {
+	philo->state = FORK;
 	if (philo->id % 2)
 	{
 		pthread_mutex_lock(philo->left_fork);
-		check_pulse(philo->last_eat_time, philo->lifetime, philo);
-		if (philo->state != DEAD && philo->state != DONE)
-			print_status(philo, "has taken a fork", false);
+		print_status(philo, "has taken a fork", false);
 		pthread_mutex_lock(philo->right_fork);
+		print_status(philo, "has taken a fork", false);
 	}
 	else
 	{
 		pthread_mutex_lock(philo->right_fork);
-		check_pulse(philo->last_eat_time, philo->lifetime, philo);
-		if (philo->state != DEAD && philo->state != DONE)
-			print_status(philo, "has taken a fork", false);
+		print_status(philo, "has taken a fork", false);
 		pthread_mutex_lock(philo->left_fork);
+		print_status(philo, "has taken a fork", false);
 	}
-	check_pulse(philo->last_eat_time, philo->lifetime, philo);
-	if (philo->state != DEAD && philo->state != DONE)
-		print_status(philo, "is eating", false);
+	philo->state = EATING;
+	print_status(philo, "is eating", false);
 }
