@@ -57,6 +57,8 @@ void	*philosopher(void *state)
 			sleeping(philo);
 		else if (philo->state == THINKING)
 			thinking(philo);
+		else if (philo->state == DONE)
+			break ;
 	}
 	return (NULL);
 }
@@ -78,6 +80,11 @@ void	thinking(t_philo *philo)
 
 void	eating(t_philo *philo)
 {
+	if (philo->left_fork == philo->right_fork)
+	{
+		usleep(1000);
+		return ;
+	}
 	fork_lock(philo);
 	usleep(philo->eat_time * 1000);
 	philo->last_eat_time = get_time();

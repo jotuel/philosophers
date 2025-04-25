@@ -28,10 +28,7 @@ int	main(int argc, char **argv)
 	philos = NULL;
 	philos = sanitize_input(argc, argv, philos);
 	if (!philos)
-	{
-		write(2, "Error: Failed to allocate memory for philosophers\n", 51);
 		return (EXIT_FAILURE);
-	}
 	create_threads(philos, 0);
 	join_threads(philos, 0);
 	free(philos);
