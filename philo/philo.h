@@ -35,7 +35,8 @@ enum				e_philo_state
 typedef struct s_philo
 {
 	atomic_int					id;
-	atomic_size_t				start;
+	bool						group;
+	atomic_size_t				*start;
 	atomic_size_t				sleep_time;
 	atomic_size_t				eat_time;
 	atomic_size_t				last_eat_time;

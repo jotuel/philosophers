@@ -36,6 +36,9 @@ int	main(int argc, char **argv)
 
 t_philo	*init_philos(int arguments[5], t_philo *philos, int i)
 {
+	static atomic_size_t utc;
+
+	utc = get_time();
 	philos = malloc(sizeof(t_philo) * (arguments[0] + 1));
 	if (!philos)
 		return (philos);
@@ -43,13 +46,13 @@ t_philo	*init_philos(int arguments[5], t_philo *philos, int i)
 	while (i < arguments[0])
 	{
 		philos[i].id = i + 1;
-		philos[i].start = get_time();
-		philos[i].last_eat_time = philos[i].start;
+		philos[i].start = &utc;
+		philos[i].last_eat_time = *philos[i].start;
 		philos[i].sleep_time = arguments[3];
 		philos[i].lifetime = arguments[1];
 		philos[i].eat_time = arguments[2];
 		philos[i].eat_count = arguments[4];
-		philos[i].state = THINKING;
+		philos[i].state = FORK;
 		philos[i].left_fork = &philos[i].fork;
 		if (pthread_mutex_init(philos[i].left_fork, NULL))
 			return (free_philos(philos), NULL);
@@ -67,7 +70,7 @@ void	print_status(t_philo *philo, char *status, bool destroy)
 
 	pthread_mutex_lock(&mtx);
 	if (!*(philo->death) || philo->state == DEAD)
-		printf(fmt, get_time() - philo->start, philo->id, status);
+		printf(fmt, get_time() - *philo->start, philo->id, status);
 	pthread_mutex_unlock(&mtx);
 	if (destroy)
 		pthread_mutex_destroy(&mtx);
@@ -94,6 +97,7 @@ void	create_threads(t_philo *philos, int i)
 		}
 		i++;
 	}
+	*philos[0].start = get_time();
 	begin = true;
 	if (pthread_create(&philos[i].thread, NULL, &observer, philos))
 	{

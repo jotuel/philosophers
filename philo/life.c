@@ -19,18 +19,16 @@ void	*observer(void *arg)
 
 	philo = (t_philo *)arg;
 	i = 0;
-	while (philo[0].state != DONE)
+	while (!*philo[0].death)
 	{
 		while (philo[i].id)
 		{
-			if (get_time() - philo[i].last_eat_time > philo[i].lifetime
-				&& philo[i].state)
+			if (get_time() - philo[i].last_eat_time > philo[i].lifetime)
 			{
 				philo[i].state = DEAD;
 				*philo[i].death = true;
 				print_status(&philo[i], "died", false);
 				philo[i].state = DONE;
-				return (NULL);
 			}
 			i++;
 		}
@@ -45,10 +43,14 @@ void	*philosopher(void *state)
 	t_philo	*philo;
 
 	philo = state;
+	if (philo->id % 2)
+	{
+		philo->group = true;
+		usleep(philo->eat_time * 1000);
+	}
 	while (!*philo->begin)
 		usleep(1000);
-	philo->start = get_time();
-	philo->last_eat_time = philo->start;
+	philo->last_eat_time = *philo->start;
 	while (!*philo->death)
 	{
 		if (philo->state == FORK)
@@ -75,6 +77,7 @@ void	sleeping(t_philo *philo)
 void	thinking(t_philo *philo)
 {
 	print_status(philo, "is thinking", false);
+	//usleep(philo->eat_time);
 	philo->state = FORK;
 }
 
@@ -86,8 +89,8 @@ void	eating(t_philo *philo)
 		return ;
 	}
 	fork_lock(philo);
-	usleep(philo->eat_time * 1000);
 	philo->last_eat_time = get_time();
+	usleep(philo->eat_time * 1000);
 	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_unlock(philo->right_fork);
 	philo->eat_count--;

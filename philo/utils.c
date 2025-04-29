@@ -76,11 +76,12 @@ t_philo	*sanitize_input(int argc, char **argv, t_philo *philos)
 void	fork_lock(t_philo *philo)
 {
 	philo->state = FORK;
-	if (philo->id % 2)
+	if (philo->group)
 	{
 		pthread_mutex_lock(philo->left_fork);
 		print_status(philo, "has taken a fork", false);
 		pthread_mutex_lock(philo->right_fork);
+		philo->state = EATING;
 		print_status(philo, "has taken a fork", false);
 	}
 	else
@@ -88,8 +89,8 @@ void	fork_lock(t_philo *philo)
 		pthread_mutex_lock(philo->right_fork);
 		print_status(philo, "has taken a fork", false);
 		pthread_mutex_lock(philo->left_fork);
+		philo->state = EATING;
 		print_status(philo, "has taken a fork", false);
 	}
-	philo->state = EATING;
 	print_status(philo, "is eating", false);
 }
