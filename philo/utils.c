@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "philo.h"
+#include <unistd.h>
 
 static int	ft_atoi(char *s)
 {
@@ -34,7 +35,7 @@ size_t	get_time(void)
 	struct timeval	time;
 
 	if (gettimeofday(&time, NULL) == -1)
-		write(2, "gettimeofday() error\n", 22);
+		dprintf(STDERR_FILENO, "gettimeofday() error\n");
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
@@ -67,9 +68,9 @@ t_philo	*sanitize_input(int argc, char **argv, t_philo *philos)
 		arguments[4] = -1;
 	if (arguments[0] && arguments[1] && arguments[2] && arguments[3]
 		&& arguments[4])
-		philos = init_philos(arguments, philos, 0);
+		philos = init_philos(arguments, philos);
 	if (!philos)
-		write(2, "Error: Failed to initialize philosophers.\n", 43);
+		dprintf(STDERR_FILENO, "Error: Failed to initialize philosophers.\n");
 	return (philos);
 }
 

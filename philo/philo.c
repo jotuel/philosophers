@@ -11,40 +11,35 @@
 /* ************************************************************************** */
 
 #include "philo.h"
+#include <sys/cdefs.h>
+#include <unistd.h>
+#include <assert.h>
 
 int	main(int argc, char **argv)
 {
-	t_philo	*philos;
-
-	if (argc != 5 && argc != 6)
-	{
-		write(2,
-			"Usage: ./philo <number_of_philosophers> <time_to_die "
-			"<time_to_eat> <time_to_sleep> "
-			"[<number_of_times_each_philosopher_must_eat>]\n",
-			129);
+	if (argc != 5 && argc != 6) {
+		dprintf(STDERR_FILENO,
+		"Usage: ./philo <number_of_philosophers> <time_to_die> <time_to_eat>"
+		" <time_to_sleep> [<number_of_times_each_philosopher_must_eat>]\n");
 		return (EXIT_FAILURE);
 	}
-	philos = NULL;
+	t_philo *philos = NULL;
 	philos = sanitize_input(argc, argv, philos);
 	if (!philos)
 		return (EXIT_FAILURE);
-	create_threads(philos, 0);
-	join_threads(philos, 0);
+	create_threads(philos);
+	join_threads(philos);
 	free(philos);
 }
 
-t_philo	*init_philos(int arguments[5], t_philo *philos, int i)
+t_philo	*init_philos(int arguments[5], t_philo *philos)
 {
 	static atomic_size_t utc;
-
 	utc = get_time();
 	philos = malloc(sizeof(t_philo) * (arguments[0] + 1));
-	if (!philos)
-		return (philos);
+	assert(philos);
 	memset(philos, 0, sizeof(t_philo) * (arguments[0] + 1));
-	while (i < arguments[0])
-	{
+	for (int i = 0; i < arguments[0]; i++) {
 		philos[i].id = i + 1;
 		philos[i].start = &utc;
 		philos[i].last_eat_time = *philos[i].start;
@@ -56,8 +51,7 @@ t_philo	*init_philos(int arguments[5], t_philo *philos, int i)
 		philos[i].left_fork = &philos[i].fork;
 		if (pthread_mutex_init(philos[i].left_fork, NULL))
 			return (free_philos(philos), NULL);
-		i++;
-		philos[i].right_fork = philos[i - 1].left_fork;
+		philos[i + 1].right_fork = philos[i].left_fork;
 	}
 	philos[0].right_fork = philos[arguments[0] - 1].left_fork;
 	return (philos);
@@ -68,10 +62,11 @@ void	print_status(t_philo *philo, char *status, bool destroy)
 	static pthread_mutex_t	mtx = PTHREAD_MUTEX_INITIALIZER;
 	static char				*fmt = "%ld %d %s\n";
 
-	pthread_mutex_lock(&mtx);
-	if (!*(philo->death) || philo->state == DEAD)
-		printf(fmt, get_time() - *philo->start, philo->id, status);
-	pthread_mutex_unlock(&mtx);
+
+    pthread_mutex_lock(&mtx);
+    if (!*(philo->death) || ( philo->death && philo->state == DEAD ) )
+    	printf(fmt, get_time() - *philo->start, philo->id, status);
+    pthread_mutex_unlock(&mtx);
 	if (destroy)
 		pthread_mutex_destroy(&mtx);
 }
@@ -79,40 +74,33 @@ void	print_status(t_philo *philo, char *status, bool destroy)
 void	*philosopher(void *state);
 void	*observer(void *arg);
 
-void	create_threads(t_philo *philos, int i)
+void	create_threads(t_philo *philos)
 {
-	static atomic_bool	death = false;
-	static atomic_bool	begin = false;
-
-	while (philos[i].id)
-	{
+	static atomic_bool	death = false, begin = false;
+	int i;
+	for (i = 0; philos[i].id; i++) {
 		philos[i].death = &death;
 		philos[i].begin = &begin;
-		if (pthread_create(&philos[i].thread, NULL, &philosopher, &philos[i]))
-		{
-			write(2, "Error: pthread_create\n", 25);
+		if (pthread_create(&philos[i].thread, NULL, &philosopher, &philos[i])) {
+			dprintf(STDERR_FILENO, "Error: pthread_create\n");
 			death = true;
 			begin = true;
 			return ;
 		}
-		i++;
 	}
 	*philos[0].start = get_time();
 	begin = true;
-	if (pthread_create(&philos[i].thread, NULL, &observer, philos))
-	{
-		write(2, "Error: pthread_create\n", 25);
+	if (pthread_create(&philos[i].thread, NULL, &observer, philos)) {
+		dprintf(STDERR_FILENO, "Error: pthread_create\n");
 		death = true;
 		return ;
 	}
 }
 
-void	join_threads(t_philo *philos, int i)
+void	join_threads(t_philo *philos)
 {
-	while (philos[i].id)
-	{
+    int i;
+	for (i = 0; philos[i].id; i++)
 		pthread_join(philos[i].thread, NULL);
-		i++;
-	}
 	pthread_join(philos[i].thread, NULL);
 }

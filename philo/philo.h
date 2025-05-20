@@ -24,12 +24,12 @@
 
 enum				e_philo_state
 {
+    DONE,
 	EATING,
 	SLEEPING,
 	THINKING,
 	DEAD,
 	FORK,
-	DONE
 };
 
 typedef struct s_philo
@@ -52,7 +52,7 @@ typedef struct s_philo
 	atomic_bool					*begin;
 }					t_philo;
 
-t_philo				*init_philos(int arguments[5], t_philo *philos, int i);
+t_philo				*init_philos(int arguments[5], t_philo *philos);
 t_philo				*sanitize_input(int argc, char **argv, t_philo *philos);
 void				fork_lock(t_philo *philo);
 void				check_pulse(atomic_size_t last_meal,
@@ -60,8 +60,8 @@ void				check_pulse(atomic_size_t last_meal,
 pthread_mutex_t		*init_mutexes(int num_philos);
 size_t				get_time(void);
 void				print_status(t_philo *philo, char *status, bool destroy);
-void				create_threads(t_philo *philos, int i);
-void				join_threads(t_philo *philos, int i);
+void				create_threads(t_philo *philos);
+void				join_threads(t_philo *philos);
 void				free_philos(t_philo *philos);
 void				eating(t_philo *philo);
 void				sleeping(t_philo *philo);

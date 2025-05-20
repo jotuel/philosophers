@@ -16,11 +16,13 @@ HEADER= philo.h
 SRC = philo.c utils.c life.c
 
 all: $(NAME)
-$(NAME): $(SRC)
+$(NAME): $(SRC) $(HEADER)
 	cc $(SRC) -I . $(FLAG) -o $@
 clean:
 fclean:
-	rm $(NAME)
+	rm -f $(NAME)
 re: fclean all
+debug:
+	cc -g2 $(SRC) -o $(NAME)
 .PHONY:
 	all, $(NAME), clean, fclean, re
