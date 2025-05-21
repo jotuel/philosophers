@@ -60,19 +60,13 @@ t_philo	*init_philos(int arguments[5], t_philo *philos)
 void	print_status(t_philo *philo, char *status, bool destroy)
 {
 	static pthread_mutex_t	mtx = PTHREAD_MUTEX_INITIALIZER;
-	static char				*fmt = "%ld %d %s\n";
-
-
     pthread_mutex_lock(&mtx);
     if (!*(philo->death) || ( philo->death && philo->state == DEAD ) )
-    	printf(fmt, get_time() - *philo->start, philo->id, status);
+    	printf(FMT, get_time() - *philo->start, philo->id, status);
     pthread_mutex_unlock(&mtx);
 	if (destroy)
 		pthread_mutex_destroy(&mtx);
 }
-
-void	*philosopher(void *state);
-void	*observer(void *arg);
 
 void	create_threads(t_philo *philos)
 {

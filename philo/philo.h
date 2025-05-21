@@ -22,6 +22,8 @@
 # include <sys/time.h>
 # include <unistd.h>
 
+#define FMT "%ld %d %s\n"
+
 enum				e_philo_state
 {
     DONE,
@@ -54,6 +56,8 @@ typedef struct s_philo
 
 t_philo				*init_philos(int arguments[5], t_philo *philos);
 t_philo				*sanitize_input(int argc, char **argv, t_philo *philos);
+void	            *philosopher(void *state);
+void	            *observer(void *arg);
 void				fork_lock(t_philo *philo);
 void				check_pulse(atomic_size_t last_meal,
 						atomic_size_t time_btw_meals, t_philo *philo);
